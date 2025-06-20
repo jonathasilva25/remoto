@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 import sqlite3
 import os
-from datetime import datetime
 
 app = Flask(__name__)
 DB_NAME = "usuarios.db"
@@ -15,11 +14,10 @@ def inicializar_banco():
             CREATE TABLE usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 usuario TEXT NOT NULL UNIQUE,
-                senha TEXT NOT NULL,
-                expira_em TEXT
+                senha TEXT NOT NULL
             )
         """)
-        cursor.execute("INSERT INTO usuarios (usuario, senha, expira_em) VALUES (?, ?, ?)", ("admin", "1234", None))
+        cursor.execute("INSERT INTO usuarios (usuario, senha) VALUES (?, ?)", ("admin", "1234"))
         conn.commit()
         conn.close()
 
@@ -31,28 +29,17 @@ def api_login():
     senha = data.get("pass")
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT expira_em FROM usuarios WHERE usuario=? AND senha=?", (usuario, senha))
+    cursor.execute("SELECT * FROM usuarios WHERE usuario=? AND senha=?", (usuario, senha))
     resultado = cursor.fetchone()
     conn.close()
-
-    if resultado:
-        expira_em = resultado[0]
-        if expira_em:
-            try:
-                expira_dt = datetime.strptime(expira_em, "%Y-%m-%d %H:%M")
-                if datetime.now() > expira_dt:
-                    return jsonify({"valid": False, "reason": "expired"})
-            except:
-                pass
-        return jsonify({"valid": True})
-    return jsonify({"valid": False})
+    return jsonify({"valid": bool(resultado)})
 
 # --- Painel Web para gerenciar usuários ---
 @app.route("/")
 def index():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, usuario, expira_em FROM usuarios ORDER BY id")
+    cursor.execute("SELECT id, usuario FROM usuarios ORDER BY id")
     usuarios = cursor.fetchall()
     conn.close()
     return render_template("index.html", usuarios=usuarios)
@@ -61,12 +48,11 @@ def index():
 def adicionar():
     usuario = request.form.get("usuario")
     senha = request.form.get("senha")
-    expira_em = request.form.get("expira_em") or None
     if usuario and senha:
         try:
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO usuarios (usuario, senha, expira_em) VALUES (?, ?, ?)", (usuario, senha, expira_em))
+            cursor.execute("INSERT INTO usuarios (usuario, senha) VALUES (?, ?)", (usuario, senha))
             conn.commit()
         except:
             pass
