@@ -1,76 +1,73 @@
-from flask import Flask, request, jsonify, render_template, redirect
-from datetime import datetime, timedelta
-import json
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+import sqlite3
 import os
 
 app = Flask(__name__)
-USER_FILE = "usuarios.json"
+DB_NAME = "usuarios.db"
 
-# --- Carregar usuários ---
-def carregar_usuarios():
-    if not os.path.exists(USER_FILE):
-        with open(USER_FILE, "w") as f:
-            json.dump([], f)
-    with open(USER_FILE) as f:
-        return json.load(f)
+# --- Inicializa o banco se necessário ---
+def inicializar_banco():
+    if not os.path.exists(DB_NAME):
+        conn = sqlite3.connect(DB_NAME)
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE usuarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario TEXT NOT NULL UNIQUE,
+                senha TEXT NOT NULL
+            )
+        """)
+        cursor.execute("INSERT INTO usuarios (usuario, senha) VALUES (?, ?)", ("admin", "1234"))
+        conn.commit()
+        conn.close()
 
-# --- Salvar usuários ---
-def salvar_usuarios(users):
-    with open(USER_FILE, "w") as f:
-        json.dump(users, f, indent=4)
-
-# --- Validação ---
-def encontrar_usuario(nome):
-    for u in carregar_usuarios():
-        if u["usuario"] == nome:
-            return u
-    return None
-
-# --- API de login com checagem de expiração ---
+# --- API de login (usada pela aplicação desktop) ---
 @app.route("/api/login", methods=["POST"])
 def api_login():
-    data = request.json
+    data = request.get_json()
     usuario = data.get("user")
     senha = data.get("pass")
-    u = encontrar_usuario(usuario)
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM usuarios WHERE usuario=? AND senha=?", (usuario, senha))
+    resultado = cursor.fetchone()
+    conn.close()
+    return jsonify({"valid": bool(resultado)})
 
-    if u and u["senha"] == senha:
-        expira_em = u.get("expira_em")
-        if expira_em:
-            expira_data = datetime.strptime(expira_em, "%Y-%m-%d %H:%M:%S")
-            if datetime.now() > expira_data:
-                return jsonify({"valid": False, "message": "Usuário expirado."})
-        return jsonify({"valid": True})
-    return jsonify({"valid": False})
-
-# --- Interface de administração ---
+# --- Painel Web para gerenciar usuários ---
 @app.route("/")
 def index():
-    return render_template("index.html", usuarios=carregar_usuarios())
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, usuario FROM usuarios ORDER BY id")
+    usuarios = cursor.fetchall()
+    conn.close()
+    return render_template("index.html", usuarios=usuarios)
 
-@app.route("/add", methods=["POST"])
-def adicionar_usuario():
-    nome = request.form["usuario"]
-    senha = request.form["senha"]
-    expira_em = request.form["expira_em"] or None
-    if expira_em:
+@app.route("/adicionar", methods=["POST"])
+def adicionar():
+    usuario = request.form.get("usuario")
+    senha = request.form.get("senha")
+    if usuario and senha:
         try:
-            datetime.strptime(expira_em, "%Y-%m-%d %H:%M:%S")  # valida formato
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO usuarios (usuario, senha) VALUES (?, ?)", (usuario, senha))
+            conn.commit()
         except:
-            return "Data inválida. Use YYYY-MM-DD HH:MM:SS", 400
-    users = carregar_usuarios()
-    if encontrar_usuario(nome):
-        return "Usuário já existe", 400
-    users.append({"usuario": nome, "senha": senha, "expira_em": expira_em})
-    salvar_usuarios(users)
-    return redirect("/")
+            pass
+        finally:
+            conn.close()
+    return redirect(url_for("index"))
 
-@app.route("/remove/<usuario>")
-def remover_usuario(usuario):
-    users = carregar_usuarios()
-    users = [u for u in users if u["usuario"] != usuario]
-    salvar_usuarios(users)
-    return redirect("/")
+@app.route("/remover/<int:user_id>")
+def remover(user_id):
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM usuarios WHERE id=?", (user_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("index"))
 
 # --- Inicialização ---
 if __name__ == "__main__":
