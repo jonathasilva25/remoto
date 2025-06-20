@@ -72,5 +72,8 @@ def remover_usuario(usuario):
     salvar_usuarios(users)
     return redirect("/")
 
+# --- Inicialização ---
 if __name__ == "__main__":
-    app.run(debug=True)
+    inicializar_banco()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
