@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel de Usuários</title>
+    <style>
+        body { font-family: Arial; background: #f0f0f0; padding: 40px; }
+        h1 { color: #333; }
+        form, table { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        input { padding: 6px; margin-right: 10px; }
+        button { padding: 6px 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
+        a { color: red; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h1>Gerenciar Usuários</h1>
+
+    <form method="post" action="/adicionar">
+        <input type="text" name="usuario" placeholder="Usuário" required>
+        <input type="text" name="senha" placeholder="Senha" required>
+        <button type="submit">Adicionar Usuário</button>
+    </form>
+
+    <table>
+        <tr><th>ID</th><th>Usuário</th><th>Ações</th></tr>
+        {% for id, usuario in usuarios %}
+        <tr>
+            <td>{{ id }}</td>
+            <td>{{ usuario }}</td>
+            <td><a href="/remover/{{ id }}">Remover</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
