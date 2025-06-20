@@ -1,31 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Gerenciar Usuários</title>
+    <meta charset="UTF-8">
+    <title>Painel de Usuários</title>
     <style>
-        body { font-family: Arial; padding: 20px; background: #f9f9f9; }
-        input, button { margin: 4px; padding: 6px; }
-        ul { list-style: none; padding-left: 0; }
-        li { padding: 6px 0; }
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background-color: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            color: #111827;
+        }
+
+        h1 {
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        input, button, select {
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+        }
+
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background-color: #f9fafb;
+        }
+
+        .expira-info {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .danger-button {
+            background-color: #dc2626;
+        }
+
+        .danger-button:hover {
+            background-color: #b91c1c;
+        }
+
+        .edit-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .small-button {
+            font-size: 14px;
+            padding: 6px 10px;
+        }
     </style>
 </head>
 <body>
-    <h2>Adicionar Usuário</h2>
-    <form method="POST" action="/adicionar">
-        <input name="usuario" placeholder="Usuário" required>
-        <input name="senha" placeholder="Senha" required>
-        <input name="expira_em" placeholder="Expira em (YYYY-MM-DD HH:MM)">
-        <button type="submit">Adicionar</button>
-    </form>
+    <div class="container">
+        <h1>Gerenciar Usuários</h1>
 
-    <h2>Usuários Atuais</h2>
-    <ul>
-        {% for u in usuarios %}
-        <li>
-            {{ u[1] }} (expira: {{ u[2] if u[2] else "nunca" }})
-            <a href="/remover/{{ u[0] }}">Remover</a>
-        </li>
-        {% endfor %}
-    </ul>
+        <form method="POST" action="/adicionar">
+            <input name="usuario" placeholder="Usuário" required>
+            <input name="senha" type="password" placeholder="Senha" required>
+            <input name="expira_em" type="datetime-local" placeholder="Expiração (opcional)">
+            <button type="submit">➕ Adicionar Usuário</button>
+        </form>
+
+        <form method="POST" action="/remover_expirados">
+            <button type="submit" class="danger-button small-button">🧹 Remover Usuários Expirados</button>
+        </form>
+
+        <h2>Lista de Usuários</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Usuário</th>
+                    <th>Expira em</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr>
+                    <td>{{ u.usuario }}</td>
+                    <td>
+                        {% if u.expira_em %}
+                            {{ u.expira_em }}
+                        {% else %}
+                            <span class="expira-info">Nunca expira</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="/editar/{{ u.id }}" class="edit-form">
+                            <input type="datetime-local" name="nova_data" required>
+                            <button class="small-button" type="submit">✏️ Atualizar Expiração</button>
+                            <a class="small-button danger-button" href="/remover/{{ u.id }}">🗑️ Remover</a>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </body>
 </html>
