@@ -4,111 +4,34 @@
     <meta charset="UTF-8">
     <title>Painel de Usuários</title>
     <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f2f4f8;
-            margin: 0;
-            padding: 40px;
-        }
-
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-        }
-
-        h1 {
-            margin-top: 0;
-            color: #333;
-        }
-
-        form {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f7f9fc;
-            font-weight: bold;
-        }
-
-        a.remove-link {
-            color: #e74c3c;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        a.remove-link:hover {
-            text-decoration: underline;
-        }
+        body { font-family: Arial; background: #f0f0f0; padding: 40px; }
+        h1 { color: #333; }
+        form, table { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        input { padding: 6px; margin-right: 10px; }
+        button { padding: 6px 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
+        a { color: red; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Gerenciar Usuários</h1>
+    <h1>Gerenciar Usuários</h1>
 
-        <form method="post" action="/adicionar">
-            <input type="text" name="usuario" placeholder="Usuário" required>
-            <input type="text" name="senha" placeholder="Senha" required>
-            <button type="submit">Adicionar</button>
-        </form>
+    <form method="post" action="/adicionar">
+        <input type="text" name="usuario" placeholder="Usuário" required>
+        <input type="text" name="senha" placeholder="Senha" required>
+        <button type="submit">Adicionar Usuário</button>
+    </form>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Usuário</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for id, usuario in usuarios %}
-                <tr>
-                    <td>{{ id }}</td>
-                    <td>{{ usuario }}</td>
-                    <td><a class="remove-link" href="/remover/{{ id }}">Remover</a></td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <table>
+        <tr><th>ID</th><th>Usuário</th><th>Ações</th></tr>
+        {% for id, usuario in usuarios %}
+        <tr>
+            <td>{{ id }}</td>
+            <td>{{ usuario }}</td>
+            <td><a href="/remover/{{ id }}">Remover</a></td>
+        </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>
