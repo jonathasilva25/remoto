@@ -5,90 +5,79 @@
     <title>Painel de Usuários</title>
     <style>
         body {
-            font-family: "Segoe UI", sans-serif;
-            background-color: #f3f4f6;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f2f4f8;
             margin: 0;
-            padding: 20px;
-            color: #111827;
-        }
-
-        h1 {
-            color: #1f2937;
+            padding: 40px;
         }
 
         .container {
-            max-width: 800px;
-            margin: auto;
+            max-width: 700px;
+            margin: 0 auto;
             background: white;
-            padding: 25px;
+            padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #333;
         }
 
         form {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-bottom: 30px;
         }
 
-        input, button, select {
+        input[type="text"] {
+            flex: 1;
             padding: 10px;
-            font-size: 16px;
+            border: 1px solid #ccc;
             border-radius: 6px;
-            border: 1px solid #d1d5db;
         }
 
         button {
-            background-color: #2563eb;
+            background-color: #007BFF;
             color: white;
             border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background 0.3s ease;
+            transition: background-color 0.3s ease;
         }
 
         button:hover {
-            background-color: #1d4ed8;
+            background-color: #0056b3;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
             text-align: left;
-            padding: 10px;
-            border-bottom: 1px solid #e5e7eb;
         }
 
         th {
-            background-color: #f9fafb;
+            background-color: #f7f9fc;
+            font-weight: bold;
         }
 
-        .expira-info {
-            color: #6b7280;
-            font-size: 14px;
+        a.remove-link {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: bold;
         }
 
-        .danger-button {
-            background-color: #dc2626;
-        }
-
-        .danger-button:hover {
-            background-color: #b91c1c;
-        }
-
-        .edit-form {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .small-button {
-            font-size: 14px;
-            padding: 6px 10px;
+        a.remove-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -96,44 +85,26 @@
     <div class="container">
         <h1>Gerenciar Usuários</h1>
 
-        <form method="POST" action="/adicionar">
-            <input name="usuario" placeholder="Usuário" required>
-            <input name="senha" type="password" placeholder="Senha" required>
-            <input name="expira_em" type="datetime-local" placeholder="Expiração (opcional)">
-            <button type="submit">➕ Adicionar Usuário</button>
+        <form method="post" action="/adicionar">
+            <input type="text" name="usuario" placeholder="Usuário" required>
+            <input type="text" name="senha" placeholder="Senha" required>
+            <button type="submit">Adicionar</button>
         </form>
 
-        <form method="POST" action="/remover_expirados">
-            <button type="submit" class="danger-button small-button">🧹 Remover Usuários Expirados</button>
-        </form>
-
-        <h2>Lista de Usuários</h2>
         <table>
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Usuário</th>
-                    <th>Expira em</th>
                     <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
-                {% for u in usuarios %}
+                {% for id, usuario in usuarios %}
                 <tr>
-                    <td>{{ u.usuario }}</td>
-                    <td>
-                        {% if u.expira_em %}
-                            {{ u.expira_em }}
-                        {% else %}
-                            <span class="expira-info">Nunca expira</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <form method="POST" action="/editar/{{ u.id }}" class="edit-form">
-                            <input type="datetime-local" name="nova_data" required>
-                            <button class="small-button" type="submit">✏️ Atualizar Expiração</button>
-                            <a class="small-button danger-button" href="/remover/{{ u.id }}">🗑️ Remover</a>
-                        </form>
-                    </td>
+                    <td>{{ id }}</td>
+                    <td>{{ usuario }}</td>
+                    <td><a class="remove-link" href="/remover/{{ id }}">Remover</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
