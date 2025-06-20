@@ -1,37 +1,29 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Painel de Usuários</title>
+    <title>Gerenciar Usuários</title>
     <style>
-        body { font-family: Arial; background: #f0f0f0; padding: 40px; }
-        h1 { color: #333; }
-        form, table { background: white; padding: 20px; border-radius: 8px; margin-top: 20px; }
-        input { padding: 6px; margin-right: 10px; }
-        button { padding: 6px 12px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border-bottom: 1px solid #ccc; text-align: left; }
-        a { color: red; text-decoration: none; }
+        body { font-family: Arial; padding: 20px; }
+        input { margin: 4px; }
     </style>
 </head>
 <body>
-    <h1>Gerenciar Usuários</h1>
-
-    <form method="post" action="/adicionar">
-        <input type="text" name="usuario" placeholder="Usuário" required>
-        <input type="text" name="senha" placeholder="Senha" required>
-        <button type="submit">Adicionar Usuário</button>
+    <h2>Adicionar Usuário</h2>
+    <form method="POST" action="/add">
+        <input name="usuario" placeholder="Usuário" required>
+        <input name="senha" placeholder="Senha" required>
+        <input name="expira_em" placeholder="Expira em (YYYY-MM-DD HH:MM:SS)">
+        <button type="submit">Adicionar</button>
     </form>
 
-    <table>
-        <tr><th>ID</th><th>Usuário</th><th>Ações</th></tr>
-        {% for id, usuario in usuarios %}
-        <tr>
-            <td>{{ id }}</td>
-            <td>{{ usuario }}</td>
-            <td><a href="/remover/{{ id }}">Remover</a></td>
-        </tr>
+    <h2>Usuários Atuais</h2>
+    <ul>
+        {% for u in usuarios %}
+        <li>
+            {{ u.usuario }} (expira: {{ u.expira_em if u.expira_em else "nunca" }})
+            <a href="/remove/{{ u.usuario }}">Remover</a>
+        </li>
         {% endfor %}
-    </table>
+    </ul>
 </body>
 </html>
