@@ -3,16 +3,18 @@
 <head>
     <title>Gerenciar Usuários</title>
     <style>
-        body { font-family: Arial; padding: 20px; }
-        input { margin: 4px; }
+        body { font-family: Arial; padding: 20px; background: #f9f9f9; }
+        input, button { margin: 4px; padding: 6px; }
+        ul { list-style: none; padding-left: 0; }
+        li { padding: 6px 0; }
     </style>
 </head>
 <body>
     <h2>Adicionar Usuário</h2>
-    <form method="POST" action="/add">
+    <form method="POST" action="/adicionar">
         <input name="usuario" placeholder="Usuário" required>
         <input name="senha" placeholder="Senha" required>
-        <input name="expira_em" placeholder="Expira em (YYYY-MM-DD HH:MM:SS)">
+        <input name="expira_em" placeholder="Expira em (YYYY-MM-DD HH:MM)">
         <button type="submit">Adicionar</button>
     </form>
 
@@ -20,8 +22,8 @@
     <ul>
         {% for u in usuarios %}
         <li>
-            {{ u.usuario }} (expira: {{ u.expira_em if u.expira_em else "nunca" }})
-            <a href="/remove/{{ u.usuario }}">Remover</a>
+            {{ u[1] }} (expira: {{ u[2] if u[2] else "nunca" }})
+            <a href="/remover/{{ u[0] }}">Remover</a>
         </li>
         {% endfor %}
     </ul>
